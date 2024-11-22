@@ -105,6 +105,7 @@ uint get_live_cells()
 // performas a bsearch narrowing the possible -p values
 void b_search()
 {
+  // run a limitless lls
   run_lls(0);
 
   uint live_cells = get_live_cells();
