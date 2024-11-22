@@ -473,8 +473,8 @@ while solutions_remaining > 0:
         )
     else:
         output_string = status.value
+    log(f"live cells: {output_string.count('o')}", 0, 1)
     log(output_string + "\n", 0, 1)
-    log(f"live cells: {output_string.count('o')}\n", 0, 1)
     if output_file_name:
         log('Writing output file...', 1, 2)
         src.files.append_to_file_from_string(output_file_name, output_string)
