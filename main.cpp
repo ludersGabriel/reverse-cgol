@@ -10,15 +10,15 @@ using namespace std;
 // splits a string
 vector<string> split(const string& s, char delimiter)  
 {
-    vector<string> tokens;
-    stringstream ss(s);
-    string token;
+  vector<string> tokens;
+  stringstream ss(s);
+  string token;
 
-    while (getline(ss, token, delimiter)) {
-        tokens.push_back(token);
-    }
+  while (getline(ss, token, delimiter)) {
+      tokens.push_back(token);
+  }
 
-    return tokens;
+  return tokens;
 }
 
 // runs lls with verbose 1
