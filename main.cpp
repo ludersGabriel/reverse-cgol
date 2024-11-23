@@ -9,7 +9,7 @@ using namespace std;
 
 // splits a string
 vector<string> split(const string& s, char delimiter)  
- {
+{
     vector<string> tokens;
     stringstream ss(s);
     string token;
