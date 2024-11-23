@@ -1,6 +1,3 @@
-out.txt
-result.txt
-
 # Prerequisites
 *.d
 
@@ -35,3 +32,4 @@ result.txt
 *.app
 
 reverse-cgol
+*.txt
