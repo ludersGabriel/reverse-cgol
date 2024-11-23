@@ -88,21 +88,19 @@ void process_input(uint lin, uint col)
 // reads the result file and return number of cells alive
 uint get_live_cells()
 {
-  ifstream result ("result.txt");
-
   string str;
+  ifstream result ("result.txt");
+  getline(result, str); // get live cells line
+  result.close();
 
-  // get live cells line
-  getline(result, str);
   vector<string> parts = split(str, ' ');
   uint live_cells = stoul(parts[2]);
-
-  result.close();
 
   return live_cells;
 }
 
-// performas a bsearch narrowing the possible -p values
+
+// performs a bsearch narrowing the possible -p values
 void b_search()
 {
   // run a limitless lls
@@ -121,8 +119,10 @@ void b_search()
 
     run_lls(mid);
 
+    #ifdef DEBUG
     live_cells = get_live_cells();
-
+    cout << live_cells << ' ';
+    #endif
     // get result line
     ifstream result ("result.txt");
 
@@ -132,9 +132,16 @@ void b_search()
     result.close();
 
     if (line == "Unsatisfiable") {
+      #ifdef DEBUG
+      cout << "UNSAT" << endl;
+      #endif
       low = mid + 1;  // Increase the range
     }
     else {
+      system("cp result.txt best_result.txt");
+      #ifdef DEBUG
+      cout << "SAT" << endl;
+      #endif
       best_p_value = mid;
       high = mid - 1;  // Decrease the range
     }
@@ -144,7 +151,7 @@ void b_search()
 
 void print_result(uint lin, uint col)
 {
-  ifstream result ("result.txt");
+  ifstream result ("best_result.txt");
 
   string str;
 
