@@ -30,6 +30,9 @@ void run_lls(uint limit)
   if (limit == 0)
     limit = 0xFFFFFFFF;
 
+  #ifdef DEBUG
+  cout << "Teste p value: " << limit << endl << flush;
+  #endif
   sprintf(
     cmd,
     "python3 lls-project/lls.py -v 1 -p '<=%u' < out.txt > result.txt",
@@ -38,6 +41,13 @@ void run_lls(uint limit)
 
   system(cmd);
 }
+
+void write_pos(vector<vector<char>>& preproc, int i, int j, char c)
+{
+  if (i < 0 || j < 0 || i >= preproc.size() || j >= preproc[0].size()) return;
+  preproc[i][j] = c;
+}
+
 
 
 // Reads stdin, process it and write to a file out.txt
@@ -50,19 +60,21 @@ void process_input(uint lin, uint col)
       cin >> input[i][j];
 
   vector<vector<char>> preproc (lin, vector<char> (col, '0'));
-
+  /*
+  x x 0 x x 
+  x 0 0 0 x
+  0 0 1 0 0
+  x 0 0 0 x
+  x x 0 x x
+  */
   for (int i = 0; i < lin; i++)
     for (int j = 0; j < col; j++)
       if (input[i][j]) {
-        preproc[i - 1][j - 1] = '*';
-        preproc[i - 1][j]     = '*';
-        preproc[i - 1][j + 1] = '*';
-        preproc[i][j - 1]     = '*';
-        preproc[i][j]         = '*';
-        preproc[i][j + 1]     = '*';
-        preproc[i + 1][j - 1] = '*';
-        preproc[i + 1][j]     = '*';
-        preproc[i + 1][j + 1] = '*';
+        for (int l = -2; l < 2; l++)
+          for (int k = -2; k < 2; k++) {
+            if (abs(l) + abs(k) <= 2)
+              write_pos(preproc, i + l, j + k, '*');
+          }
       }
 
   ofstream output ("out.txt");
@@ -86,67 +98,131 @@ void process_input(uint lin, uint col)
 
 
 // reads the result file and return number of cells alive
-uint get_live_cells()
+pair<uint, bool> get_info()
 {
   string str;
   ifstream result ("result.txt");
   getline(result, str); // get live cells line
-  result.close();
 
   vector<string> parts = split(str, ' ');
   uint live_cells = stoul(parts[2]);
 
-  return live_cells;
+  getline(result, str); // get unsat line
+
+  result.close();
+
+  return {live_cells, str == "Unsatisfiable"};
 }
 
 
+
 // performs a bsearch narrowing the possible -p values
-void b_search()
+bool b_search()
 {
   // run a limitless lls
   run_lls(0);
 
-  uint live_cells = get_live_cells();
+  auto [live_cells, unsat] = get_info();
+  if (unsat)
+    return true;
+
+  #ifdef DEBUG
+  cout << live_cells << " SAT" << endl << flush;
+  #endif
+
+  system("cp result.txt best_result.txt");
 
   uint low = 0, high = live_cells;
-  uint mid;
-  uint best_p_value;
+  uint mid = (low + high) / 2;
 
   string line;
   //Binary search to find the minimum satisfiable -p value
-  while (low <= high) {
-    mid = (low + high) / 2;
 
+  bool increasing = false;
+  while (low < high) {
     run_lls(mid);
 
+    auto [live_cells, unsat] = get_info();
     #ifdef DEBUG
-    live_cells = get_live_cells();
-    cout << live_cells << ' ';
+    cout << live_cells << ' ' << flush;
     #endif
-    // get result line
-    ifstream result ("result.txt");
 
-    getline(result, line);
-    getline(result, line);
-
-    result.close();
-
-    if (line == "Unsatisfiable") {
+    if (unsat) {
       #ifdef DEBUG
-      cout << "UNSAT" << endl;
+      cout << "UNSAT" << endl << flush; 
       #endif
-      low = mid + 1;  // Increase the range
+      low = mid + 1;
     }
     else {
       system("cp result.txt best_result.txt");
       #ifdef DEBUG
-      cout << "SAT" << endl;
+      cout << "SAT" << endl << flush;
       #endif
-      best_p_value = mid;
-      high = mid - 1;  // Decrease the range
+      high = mid - 1;
     }
+
+    mid = (low + high) / 2;
   }
+
+  return false;
 }
+
+// // performs a bsearch narrowing the possible -p values
+// bool b_search()
+// {
+//   // run a limitless lls
+//   run_lls(0);
+
+//   auto [live_cells, unsat] = get_info();
+//   if (unsat)
+//     return true;
+
+//   #ifdef DEBUG
+//   cout << live_cells << " SAT" << endl << flush;
+//   #endif
+
+//   system("cp result.txt best_result.txt");
+
+//   uint test = live_cells - 10;
+//   uint lim = live_cells;
+
+//   string line;
+//   //Binary search to find the minimum satisfiable -p value
+
+//   bool increasing = false;
+//   while (test < lim) {
+//     run_lls(test);
+
+//     auto [live_cells, unsat] = get_info();
+//     #ifdef DEBUG
+//     cout << live_cells << ' ' << flush;
+//     #endif
+
+//     if (unsat) {
+//       #ifdef DEBUG
+//       cout << "UNSAT" << endl << flush; 
+//       #endif
+//       test += 1; // Increase the range
+
+//       increasing = true;
+//     }
+//     else {
+//       system("cp result.txt best_result.txt");
+//       #ifdef DEBUG
+//       cout << "SAT" << endl << flush;
+//       #endif
+
+//       if (increasing)
+//         break;
+
+//       lim = test;
+//       test -= 10;  // Decrease the range
+//     }
+//   }
+
+//   return false;
+// }
+
 
 
 void print_result(uint lin, uint col)
@@ -170,7 +246,7 @@ void print_result(uint lin, uint col)
 
     for (uint j = 0; j < col; j++) {
       result >> c;
-      cout << c << ' ';
+      cout << (c == 'o' ? 1 : 0) << ' ';
     }
     cout << endl;
 
@@ -187,9 +263,12 @@ int main()
 
   process_input(lin, col);
 
-  b_search();
+  bool is_eden = b_search();
 
-  print_result(lin, col);
+  if (is_eden)
+    cout << "Eden" << endl;
+  else
+    print_result(lin, col);
 
   return 0;
 }

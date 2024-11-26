@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CC=g++
-FLAGS= -g --std=c++17
+FLAGS= -g --std=c++17 -DDEBUG
 LIBS=
 SRC=$(wildcard *.cpp)
 OBJS=$(subst .cpp,.o,$(SRC))
