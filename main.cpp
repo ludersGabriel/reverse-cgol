@@ -52,7 +52,7 @@ void write_pos(vector<vector<char>>& preproc, int i, int j, char c)
 
 
 // Reads stdin, process it and write to a file out.txt
-uint process_input(uint lin, uint col)
+void process_input(uint lin, uint col)
 {
   vector<vector<uint>> input (lin, vector<uint> (col));
 
@@ -60,22 +60,7 @@ uint process_input(uint lin, uint col)
     for (uint j = 0; j < col; j++)
       cin >> input[i][j];
 
-  vector<vector<char>> preproc (lin, vector<char> (col, '0'));
-
-  for (int i = 0; i < lin; i++)
-    for (int j = 0; j < col; j++)
-      if (input[i][j]) {
-        // for (int l = -2; l <= 2; l++)
-        //   for (int k = -2; k <= 2; k++) {
-        //     if (abs(l) + abs(k) <= 2) {
-        //       write_pos(preproc, i + l, j + k, '*');
-        //     }
-        //   }
-        for (int l = -1; l <= 1; l++)
-          for (int k = -1; k <= 1; k++) {
-            write_pos(preproc, i + l, j + k, '*');
-          }
-      }
+  vector<vector<char>> preproc (lin, vector<char> (col, '*'));
 
   ofstream output ("out.txt");
 
@@ -94,8 +79,6 @@ uint process_input(uint lin, uint col)
   }
 
   output.close();
-  
-  return 0;
 }
 
 
@@ -117,7 +100,7 @@ pair<uint, bool> get_info()
 }
 
 
-bool b_search(uint live)
+bool b_search()
 {
   // run a limitless lls
   run_lls(0);
@@ -132,8 +115,8 @@ bool b_search(uint live)
 
   system("cp result.txt best_result.txt");
 
-  uint low = 0, high = live_cells;
-  uint mid = (low + high) / 2;
+  int low = 0, high = live_cells;
+  int mid = (low + high) / 2;
 
   while (low <= high) {
     run_lls(mid);
@@ -200,9 +183,9 @@ int main()
   uint lin, col;
   cin >> lin >> col;
 
-  uint live = process_input(lin, col);
+  process_input(lin, col);
 
-  bool is_eden = b_search(live);
+  bool is_eden = b_search();
 
   if (is_eden)
     cout << "Eden" << endl;
