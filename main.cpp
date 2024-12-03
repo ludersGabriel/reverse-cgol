@@ -21,10 +21,11 @@ vector<string> split(const string& s, char delimiter)
   return tokens;
 }
 
+
 // runs lls with verbose 1
 void run_lls(uint limit)
 {
-  char* cmd = (char*) malloc(sizeof(char) * 70);
+  char* cmd = (char*) malloc(sizeof(char) * 120);
   if (!cmd) {cout << "run lls malloc error"; exit(1);}
 
   if (limit == 0)
@@ -42,6 +43,7 @@ void run_lls(uint limit)
   system(cmd);
 }
 
+
 void write_pos(vector<vector<char>>& preproc, int i, int j, char c)
 {
   if (i < 0 || j < 0 || i >= preproc.size() || j >= preproc[0].size()) return;
@@ -49,9 +51,8 @@ void write_pos(vector<vector<char>>& preproc, int i, int j, char c)
 }
 
 
-
 // Reads stdin, process it and write to a file out.txt
-void process_input(uint lin, uint col)
+uint process_input(uint lin, uint col)
 {
   vector<vector<uint>> input (lin, vector<uint> (col));
 
@@ -60,20 +61,19 @@ void process_input(uint lin, uint col)
       cin >> input[i][j];
 
   vector<vector<char>> preproc (lin, vector<char> (col, '0'));
-  /*
-  x x 0 x x 
-  x 0 0 0 x
-  0 0 1 0 0
-  x 0 0 0 x
-  x x 0 x x
-  */
+
   for (int i = 0; i < lin; i++)
     for (int j = 0; j < col; j++)
       if (input[i][j]) {
-        for (int l = -2; l < 2; l++)
-          for (int k = -2; k < 2; k++) {
-            if (abs(l) + abs(k) <= 2)
-              write_pos(preproc, i + l, j + k, '*');
+        // for (int l = -2; l <= 2; l++)
+        //   for (int k = -2; k <= 2; k++) {
+        //     if (abs(l) + abs(k) <= 2) {
+        //       write_pos(preproc, i + l, j + k, '*');
+        //     }
+        //   }
+        for (int l = -1; l <= 1; l++)
+          for (int k = -1; k <= 1; k++) {
+            write_pos(preproc, i + l, j + k, '*');
           }
       }
 
@@ -94,6 +94,8 @@ void process_input(uint lin, uint col)
   }
 
   output.close();
+  
+  return 0;
 }
 
 
@@ -115,9 +117,7 @@ pair<uint, bool> get_info()
 }
 
 
-
-// performs a bsearch narrowing the possible -p values
-bool b_search()
+bool b_search(uint live)
 {
   // run a limitless lls
   run_lls(0);
@@ -135,11 +135,7 @@ bool b_search()
   uint low = 0, high = live_cells;
   uint mid = (low + high) / 2;
 
-  string line;
-  //Binary search to find the minimum satisfiable -p value
-
-  bool increasing = false;
-  while (low < high) {
+  while (low <= high) {
     run_lls(mid);
 
     auto [live_cells, unsat] = get_info();
@@ -158,7 +154,7 @@ bool b_search()
       #ifdef DEBUG
       cout << "SAT" << endl << flush;
       #endif
-      high = mid - 1;
+      high = live_cells - 1;
     }
 
     mid = (low + high) / 2;
@@ -166,63 +162,6 @@ bool b_search()
 
   return false;
 }
-
-// // performs a bsearch narrowing the possible -p values
-// bool b_search()
-// {
-//   // run a limitless lls
-//   run_lls(0);
-
-//   auto [live_cells, unsat] = get_info();
-//   if (unsat)
-//     return true;
-
-//   #ifdef DEBUG
-//   cout << live_cells << " SAT" << endl << flush;
-//   #endif
-
-//   system("cp result.txt best_result.txt");
-
-//   uint test = live_cells - 10;
-//   uint lim = live_cells;
-
-//   string line;
-//   //Binary search to find the minimum satisfiable -p value
-
-//   bool increasing = false;
-//   while (test < lim) {
-//     run_lls(test);
-
-//     auto [live_cells, unsat] = get_info();
-//     #ifdef DEBUG
-//     cout << live_cells << ' ' << flush;
-//     #endif
-
-//     if (unsat) {
-//       #ifdef DEBUG
-//       cout << "UNSAT" << endl << flush; 
-//       #endif
-//       test += 1; // Increase the range
-
-//       increasing = true;
-//     }
-//     else {
-//       system("cp result.txt best_result.txt");
-//       #ifdef DEBUG
-//       cout << "SAT" << endl << flush;
-//       #endif
-
-//       if (increasing)
-//         break;
-
-//       lim = test;
-//       test -= 10;  // Decrease the range
-//     }
-//   }
-
-//   return false;
-// }
-
 
 
 void print_result(uint lin, uint col)
@@ -261,9 +200,9 @@ int main()
   uint lin, col;
   cin >> lin >> col;
 
-  process_input(lin, col);
+  uint live = process_input(lin, col);
 
-  bool is_eden = b_search();
+  bool is_eden = b_search(live);
 
   if (is_eden)
     cout << "Eden" << endl;
