@@ -1,0 +1,31 @@
+live cells: 3
+x = 27, y = 27, rule = B3/S23
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbobobbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbobbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb$
+bbbbbbbbbbbbbbbbbbbbbbbbbbb!
+
+
