@@ -8,15 +8,17 @@ using namespace std;
 #define uint unsigned
 
 uint max_time = 290;
+uint max_run = 30;
 auto start = chrono::high_resolution_clock::now();
 
 vector<string> split(const string& s, char delimiter);
 void run_lls(uint limit);
 void write_pos(vector<vector<char>>& preproc, int i, int j, char c);
 void process_input(uint lin, uint col);
-tuple<uint, bool, bool> get_info();
+tuple<uint, bool, bool, bool> get_info();
 bool b_search();
 void print_result(uint lin, uint col);
+void print_eden(uint lin, uint col);
 
 int main() {
   uint lin, col;
@@ -26,12 +28,32 @@ int main() {
 
   bool is_eden = b_search();
 
+#ifdef DEBUG
+  long total_time_running = chrono::duration_cast<chrono::seconds>(
+                                chrono::high_resolution_clock::now() - start)
+                                .count();
+  long time_left = max_time - total_time_running;
+
+  cout << "Total time running: " << total_time_running << endl;
+  cout << "Time left: " << time_left << endl << endl << flush;
+#endif
+
   if (is_eden)
-    cout << "Eden" << endl;
+    print_eden(lin, col);
   else
     print_result(lin, col);
 
   return 0;
+}
+
+void print_eden(uint lin, uint col) {
+  cout << lin << ' ' << col << endl;
+  for (uint i = 0; i < lin; i++) {
+    for (uint j = 0; j < col; j++) {
+      cout << 0 << ' ';
+    }
+    cout << endl;
+  }
 }
 
 // splits a string
@@ -60,20 +82,22 @@ void run_lls(uint limit) {
 #ifdef DEBUG
   cout << "Teste p value: " << limit << endl << flush;
 #endif
-  auto time_until_now = chrono::duration_cast<chrono::seconds>(
+  long time_until_now = chrono::duration_cast<chrono::seconds>(
                             chrono::high_resolution_clock::now() - start)
                             .count();
-  auto time_limit = max_time - time_until_now;
+  long time_limit = max_time - time_until_now;
+  long timeoutLimit = max_run > time_limit ? time_limit : max_run;
 
 #ifdef DEBUG
-  cout << "Time until now: " << time_until_now << endl << flush;
-  cout << "Time limit: " << time_limit << endl << flush;
+  cout << "Time running: " << time_until_now << endl << flush;
+  cout << "Time remaining: " << time_limit << endl << flush;
+  cout << "Time for the current run: " << timeoutLimit << endl << flush;
 #endif
 
   sprintf(cmd,
           "python3 lls-project/lls.py -t %lu -v 1 -p '<=%u' < out.txt > "
           "result.txt",
-          time_limit, limit);
+          timeoutLimit, limit);
 
   system(cmd);
 }
@@ -110,7 +134,7 @@ void process_input(uint lin, uint col) {
 }
 
 // reads the result file and return number of cells alive
-tuple<uint, bool, bool> get_info() {
+tuple<uint, bool, bool, bool> get_info() {
   string str;
   ifstream result("result.txt");
   getline(result, str);  // get live cells line
@@ -122,18 +146,26 @@ tuple<uint, bool, bool> get_info() {
 
   result.close();
 
-  return {live_cells, str == "Unsatisfiable", str == "Timed out"};
+  long timeLeft = max_time - chrono::duration_cast<chrono::seconds>(
+                                 chrono::high_resolution_clock::now() - start)
+                                 .count();
+
+  bool killed = str == "Timed out" && timeLeft > 0;
+  bool unsat = str == "Unsatisfiable" || killed;
+  bool timedout = str == "Timed out" && timeLeft <= 0;
+
+  return {live_cells, unsat, timedout, killed};
 }
 
 bool b_search() {
   // run a limitless lls
   run_lls(0);
 
-  auto [live_cells, unsat, timedout] = get_info();
+  auto [live_cells, unsat, timedout, killed] = get_info();
   if (unsat || timedout) return true;
 
 #ifdef DEBUG
-  cout << live_cells << " SAT" << endl << flush;
+  cout << live_cells << " SAT" << endl << endl << flush;
 #endif
 
   system("cp result.txt best_result.txt");
@@ -144,26 +176,26 @@ bool b_search() {
   while (low <= high) {
     run_lls(mid);
 
-    auto [live_cells, unsat, timedout] = get_info();
+    auto [live_cells, unsat, timedout, killed] = get_info();
 #ifdef DEBUG
     cout << live_cells << ' ' << flush;
 #endif
 
     if (unsat) {
 #ifdef DEBUG
-      cout << "UNSAT" << endl << flush;
+      cout << "UNSAT, killed: " << killed << endl << endl << flush;
 #endif
       low = mid + 1;
     } else if (timedout) {
 #ifdef DEBUG
-      cout << "TIMEOUT" << endl << flush;
+      cout << "TIMEOUT" << endl << endl << flush;
 #endif
       return false;
 
     } else {
       system("cp result.txt best_result.txt");
 #ifdef DEBUG
-      cout << "SAT" << endl << flush;
+      cout << "SAT" << endl << endl << flush;
 #endif
       high = live_cells - 1;
     }
